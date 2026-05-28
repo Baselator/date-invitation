@@ -287,7 +287,7 @@ button:focus-visible {
   position: relative;
   align-self: center;
   width: min(100%, 342px);
-  height: 190px;
+  height: 230px;
   margin-top: 10px;
 }
 
@@ -320,10 +320,20 @@ button:focus-visible {
 
 .no-button {
   left: 180px;
+  top: 96px;
   border: 1px solid rgba(255, 231, 203, 0.3);
   background: rgba(255, 247, 237, 0.1);
   color: var(--text);
   will-change: left, top;
+}
+
+.no-button.is-disappearing {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.92);
+  transition:
+    opacity 220ms var(--ease),
+    transform 220ms var(--ease);
 }
 
 .feedback {
@@ -493,7 +503,7 @@ button:focus-visible {
 
   .answer-zone {
     width: 304px;
-    height: 184px;
+    height: 220px;
   }
 
   .answer-button {
@@ -502,6 +512,7 @@ button:focus-visible {
 
   .no-button {
     left: 158px;
+    top: 96px;
   }
 }
 

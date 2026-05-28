@@ -45,6 +45,7 @@ const state = {
 };
 
 let strictOverlayTimer = 0;
+let noButtonClicks = 0;
 
 function panel(content, extraClass = "") {
   return `
@@ -64,6 +65,8 @@ function icon(mark) {
 }
 
 function renderQuestion() {
+  noButtonClicks = 0;
+
   return panel(`
     ${icon("♡")}
     <h1 class="title question-title">Do you want to go on a date with me tonight?</h1>
@@ -209,6 +212,14 @@ function moveNoButton(event) {
 
   if (!button?.isConnected || !zone || !yes) return;
 
+  noButtonClicks += 1;
+
+  if (noButtonClicks >= 5) {
+    button.classList.add("is-disappearing");
+    window.setTimeout(() => button.remove(), 240);
+    return;
+  }
+
   const zoneRect = zone.getBoundingClientRect();
   const yesRect = yes.getBoundingClientRect();
   const buttonRect = button.getBoundingClientRect();
@@ -225,22 +236,17 @@ function moveNoButton(event) {
 
   const maxX = zoneRect.width - buttonRect.width;
   const maxY = zoneRect.height - buttonRect.height;
-  const moves = [
-    { x: -38, y: 26 },
-    { x: -32, y: -24 },
-    { x: 0, y: 36 },
-    { x: -44, y: 0 },
-    { x: 22, y: 32 },
-    { x: 0, y: -34 }
+  const positions = [
+    { x: maxX - 8, y: Math.min(94, maxY) },
+    { x: Math.max(maxX - 46, 0), y: Math.min(118, maxY) },
+    { x: Math.max(maxX - 10, 0), y: Math.min(150, maxY) },
+    { x: Math.max(maxX - 58, 0), y: Math.min(168, maxY) }
   ];
-  let next = {
-    x: clamp(current.left - 32, 0, maxX),
-    y: clamp(current.top + 24, 0, maxY)
-  };
+  let next = positions[(noButtonClicks - 1) % positions.length];
 
-  for (const move of moves) {
-    const x = clamp(current.left + move.x, 0, maxX);
-    const y = clamp(current.top + move.y, 0, maxY);
+  for (const position of positions) {
+    const x = Math.round(clamp(position.x, 0, maxX));
+    const y = Math.round(clamp(position.y, 0, maxY));
     const candidate = {
       left: x,
       right: x + buttonRect.width,
@@ -248,7 +254,7 @@ function moveNoButton(event) {
       bottom: y + buttonRect.height
     };
 
-    if (!boxesOverlap(candidate, yesBox, 12)) {
+    if (!boxesOverlap(candidate, yesBox, 8) && Math.hypot(x - current.left, y - current.top) > 8) {
       next = { x, y };
       break;
     }
