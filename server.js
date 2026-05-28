@@ -28,6 +28,12 @@ function send(res, status, body, type = "text/plain; charset=utf-8") {
 const server = http.createServer((req, res) => {
   if (req.method === "POST") {
     req.resume();
+
+    if ((req.url || "").split("?")[0] === "/api/send-response") {
+      send(res, 200, JSON.stringify({ ok: true, local: true }), "application/json; charset=utf-8");
+      return;
+    }
+
     send(res, 200, "OK");
     return;
   }

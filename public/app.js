@@ -276,25 +276,27 @@ function showFeedback(message, kind) {
 }
 
 async function submitChoice(activity, detail) {
-  const payload = new URLSearchParams();
-  payload.set("form-name", "date-response");
-  payload.set("subject", `Date website response: ${activity} - ${detail}`);
-  payload.set("answer", "yes");
-  payload.set("activity", activity);
-  payload.set("detail", detail);
-  payload.set("timestamp", new Date().toISOString());
-  payload.set("pagePath", window.location.href);
-  payload.set("userAgent", navigator.userAgent);
-  payload.set("bot-field", "");
+  const payload = {
+    answer: "yes",
+    activity,
+    detail,
+    timestamp: new Date().toISOString(),
+    pagePath: window.location.href,
+    userAgent: navigator.userAgent
+  };
 
   try {
-    await fetch("/", {
+    const response = await fetch("/api/send-response", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: payload.toString()
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
+
+    if (!response.ok) {
+      throw new Error(`Email request failed with ${response.status}`);
+    }
   } catch (error) {
-    console.warn("Date response could not be submitted locally.", error);
+    console.warn("Date response email could not be sent.", error);
   }
 }
 
