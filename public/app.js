@@ -44,7 +44,6 @@ const state = {
   isSubmitting: false
 };
 
-let noButtonTimer = 0;
 let noButtonHopTimers = [];
 let strictOverlayTimer = 0;
 
@@ -144,16 +143,12 @@ function renderThanks() {
 }
 
 function render() {
-  stopNoButtonLoop();
+  stopNoButtonHops();
   state.feedback = state.screen === "watch" || state.screen === "food" ? state.feedback : "";
   state.feedbackKind = state.feedback ? state.feedbackKind : "";
   app.innerHTML = screens[state.screen]();
   bindEvents();
   focusFirstHeading();
-
-  if (state.screen === "question") {
-    startNoButtonLoop();
-  }
 }
 
 function bindEvents() {
@@ -163,8 +158,6 @@ function bindEvents() {
 
   const noButton = app.querySelector('[data-action="no"]');
   noButton?.addEventListener("click", moveNoButton);
-  noButton?.addEventListener("pointerenter", () => evadeNoButton(noButton, { hops: 2, delay: 90 }));
-  noButton?.addEventListener("focus", () => evadeNoButton(noButton, { hops: 1 }));
 
   app.querySelectorAll("[data-activity]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -211,24 +204,7 @@ function setScreen(screen) {
   render();
 }
 
-function startNoButtonLoop() {
-  const button = app.querySelector('[data-action="no"]');
-
-  if (!button) return;
-
-  noButtonTimer = window.setInterval(() => {
-    evadeNoButton(button, { hops: 2, delay: 110 });
-  }, 1150);
-
-  noButtonHopTimers.push(window.setTimeout(() => evadeNoButton(button, { hops: 2, delay: 120 }), 650));
-}
-
-function stopNoButtonLoop() {
-  if (noButtonTimer) {
-    window.clearInterval(noButtonTimer);
-    noButtonTimer = 0;
-  }
-
+function stopNoButtonHops() {
   noButtonHopTimers.forEach((timer) => window.clearTimeout(timer));
   noButtonHopTimers = [];
 }
