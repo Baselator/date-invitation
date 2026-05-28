@@ -237,10 +237,10 @@ function moveNoButton(event) {
   const maxX = zoneRect.width - buttonRect.width;
   const maxY = zoneRect.height - buttonRect.height;
   const positions = [
-    { x: maxX - 8, y: Math.min(94, maxY) },
-    { x: Math.max(maxX - 46, 0), y: Math.min(118, maxY) },
-    { x: Math.max(maxX - 10, 0), y: Math.min(150, maxY) },
-    { x: Math.max(maxX - 58, 0), y: Math.min(168, maxY) }
+    { x: Math.max(maxX - 38, 0), y: current.top },
+    { x: Math.max(maxX - 72, 0), y: current.top },
+    { x: Math.max(maxX - 18, 0), y: current.top },
+    { x: Math.max(maxX - 54, 0), y: current.top }
   ];
   let next = positions[(noButtonClicks - 1) % positions.length];
 
