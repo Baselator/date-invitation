@@ -44,7 +44,6 @@ const state = {
   isSubmitting: false
 };
 
-let noButtonHopTimers = [];
 let strictOverlayTimer = 0;
 
 function panel(content, extraClass = "") {
@@ -143,7 +142,6 @@ function renderThanks() {
 }
 
 function render() {
-  stopNoButtonHops();
   state.feedback = state.screen === "watch" || state.screen === "food" ? state.feedback : "";
   state.feedbackKind = state.feedback ? state.feedbackKind : "";
   app.innerHTML = screens[state.screen]();
@@ -204,25 +202,8 @@ function setScreen(screen) {
   render();
 }
 
-function stopNoButtonHops() {
-  noButtonHopTimers.forEach((timer) => window.clearTimeout(timer));
-  noButtonHopTimers = [];
-}
-
 function moveNoButton(event) {
-  evadeNoButton(event.currentTarget, { hops: 6, delay: 80 });
-}
-
-function evadeNoButton(button, { hops = 1, delay = 0 } = {}) {
-  if (!button?.isConnected) return;
-
-  for (let index = 0; index < hops; index += 1) {
-    const timer = window.setTimeout(() => placeNoButton(button), delay * index);
-    noButtonHopTimers.push(timer);
-  }
-}
-
-function placeNoButton(button) {
+  const button = event.currentTarget;
   const zone = app.querySelector("[data-answer-zone]");
   const yes = app.querySelector('[data-action="yes"]');
 
@@ -242,11 +223,24 @@ function placeNoButton(button) {
     bottom: yesRect.bottom - zoneRect.top
   };
 
-  let next = { x: 0, y: 0 };
-  let bestDistance = -1;
-  for (let attempt = 0; attempt < 56; attempt += 1) {
-    const x = randomBetween(0, Math.max(0, zoneRect.width - buttonRect.width));
-    const y = randomBetween(0, Math.max(0, zoneRect.height - buttonRect.height));
+  const maxX = zoneRect.width - buttonRect.width;
+  const maxY = zoneRect.height - buttonRect.height;
+  const moves = [
+    { x: -38, y: 26 },
+    { x: -32, y: -24 },
+    { x: 0, y: 36 },
+    { x: -44, y: 0 },
+    { x: 22, y: 32 },
+    { x: 0, y: -34 }
+  ];
+  let next = {
+    x: clamp(current.left - 32, 0, maxX),
+    y: clamp(current.top + 24, 0, maxY)
+  };
+
+  for (const move of moves) {
+    const x = clamp(current.left + move.x, 0, maxX);
+    const y = clamp(current.top + move.y, 0, maxY);
     const candidate = {
       left: x,
       right: x + buttonRect.width,
@@ -255,20 +249,13 @@ function placeNoButton(button) {
     };
 
     if (!boxesOverlap(candidate, yesBox, 12)) {
-      const distance = Math.hypot(x - current.left, y - current.top);
-
-      if (distance > bestDistance) {
-        next = { x, y };
-        bestDistance = distance;
-      }
+      next = { x, y };
+      break;
     }
   }
 
   button.style.left = `${next.x}px`;
   button.style.top = `${next.y}px`;
-  button.classList.remove("is-running");
-  void button.offsetWidth;
-  button.classList.add("is-running");
 }
 
 function showStrictWrong() {
@@ -312,6 +299,10 @@ function boxesOverlap(a, b, padding = 0) {
 
 function randomBetween(min, max) {
   return Math.round(min + Math.random() * (max - min));
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 async function chooseFinal(button, activity, detail) {
