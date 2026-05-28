@@ -216,7 +216,7 @@ function moveNoButton(event) {
 
   if (noButtonClicks >= 5) {
     button.classList.add("is-disappearing");
-    window.setTimeout(() => button.remove(), 240);
+    window.setTimeout(() => button.remove(), 760);
     return;
   }
 
@@ -237,10 +237,10 @@ function moveNoButton(event) {
   const maxX = zoneRect.width - buttonRect.width;
   const maxY = zoneRect.height - buttonRect.height;
   const positions = [
-    { x: Math.max(maxX - 38, 0), y: current.top },
-    { x: Math.max(maxX - 72, 0), y: current.top },
-    { x: Math.max(maxX - 18, 0), y: current.top },
-    { x: Math.max(maxX - 54, 0), y: current.top }
+    { x: Math.max(maxX - 8, 0), y: current.top },
+    { x: Math.max(maxX - 104, 0), y: current.top },
+    { x: Math.max(maxX - 24, 0), y: current.top },
+    { x: Math.max(maxX - 128, 0), y: current.top }
   ];
   let next = positions[(noButtonClicks - 1) % positions.length];
 

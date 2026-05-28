@@ -326,13 +326,40 @@ button:focus-visible {
   will-change: left, top;
 }
 
-.no-button.is-disappearing {
+.no-button::before,
+.no-button::after {
+  position: absolute;
+  inset: 12px 18px;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle, rgba(255, 210, 122, 0.72) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(255, 122, 154, 0.62) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(255, 247, 237, 0.55) 0 1px, transparent 2px);
+  background-position:
+    12% 58%,
+    72% 42%,
+    48% 72%;
+  background-size:
+    28px 28px,
+    34px 34px,
+    22px 22px;
+  content: "";
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.92);
-  transition:
-    opacity 220ms var(--ease),
-    transform 220ms var(--ease);
+}
+
+.no-button.is-disappearing {
+  pointer-events: none;
+  animation: vaporizeButton 720ms var(--ease) forwards;
+}
+
+.no-button.is-disappearing::before {
+  animation: vaporCloudA 720ms var(--ease) forwards;
+}
+
+.no-button.is-disappearing::after {
+  animation: vaporCloudB 760ms var(--ease) forwards;
 }
 
 .feedback {
@@ -616,6 +643,52 @@ button:focus-visible {
   }
   100% {
     transform: scale(0.98);
+  }
+}
+
+@keyframes vaporizeButton {
+  0% {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    filter: blur(1px);
+    opacity: 0.72;
+    transform: translateY(-7px) scale(0.96);
+  }
+  100% {
+    filter: blur(10px);
+    opacity: 0;
+    transform: translateY(-26px) scale(0.68);
+  }
+}
+
+@keyframes vaporCloudA {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.7);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-34px, -38px, 0) scale(2.4) rotate(-12deg);
+  }
+}
+
+@keyframes vaporCloudB {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.7);
+  }
+  26% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(36px, -42px, 0) scale(2.7) rotate(14deg);
   }
 }
 
