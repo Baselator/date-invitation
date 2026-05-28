@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#16081f" />
+    <title>Date tonight?</title>
+    <link rel="preload" href="./assets/date-night-bg.png" as="image" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <form
+      name="date-response"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="date-response" />
+      <input type="hidden" name="subject" value="Date website response" />
+      <input type="hidden" name="answer" />
+      <input type="hidden" name="activity" />
+      <input type="hidden" name="detail" />
+      <input type="hidden" name="timestamp" />
+      <input type="hidden" name="pagePath" />
+      <input type="hidden" name="userAgent" />
+      <input name="bot-field" />
+    </form>
+
+    <main class="shell" aria-live="polite">
+      <section id="app" class="app" aria-label="Date invitation"></section>
+    </main>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
