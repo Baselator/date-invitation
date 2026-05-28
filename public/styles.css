@@ -176,15 +176,36 @@ button:focus-visible {
 .title {
   margin: 0;
   color: var(--text);
-  font-size: clamp(2.35rem, 11vw, 4.65rem);
-  font-weight: 850;
-  line-height: 0.97;
+  font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(2.2rem, 9.8vw, 4.15rem);
+  font-weight: 700;
+  line-height: 1.04;
   text-align: center;
+  text-shadow: 0 8px 26px rgba(0, 0, 0, 0.32);
   text-wrap: balance;
 }
 
+.title:focus {
+  outline: none;
+}
+
+.question-title {
+  width: min(100%, 326px);
+  max-width: none;
+  margin-inline: auto;
+  padding: 12px 14px 16px;
+  border: 2px solid rgba(255, 247, 237, 0.72);
+  border-radius: var(--radius);
+  background: rgba(15, 5, 22, 0.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 247, 237, 0.1),
+    0 18px 48px rgba(0, 0, 0, 0.22);
+  font-size: clamp(2.04rem, 8.6vw, 3.4rem);
+  line-height: 1.06;
+}
+
 .title.small {
-  font-size: clamp(2rem, 9vw, 3.4rem);
+  font-size: clamp(2rem, 8.2vw, 3.25rem);
 }
 
 .choice-grid,
@@ -266,7 +287,7 @@ button:focus-visible {
   position: relative;
   align-self: center;
   width: min(100%, 342px);
-  height: 168px;
+  height: 190px;
   margin-top: 10px;
 }
 
@@ -282,8 +303,8 @@ button:focus-visible {
   font-size: 1.05rem;
   font-weight: 850;
   transition:
-    left 330ms var(--ease),
-    top 330ms var(--ease),
+    left 240ms var(--ease),
+    top 240ms var(--ease),
     transform 160ms var(--ease),
     box-shadow 180ms var(--ease);
 }
@@ -303,10 +324,11 @@ button:focus-visible {
   border: 1px solid rgba(255, 231, 203, 0.3);
   background: rgba(255, 247, 237, 0.1);
   color: var(--text);
+  will-change: left, top, transform;
 }
 
 .no-button.is-running {
-  animation: dodge 360ms var(--ease) both;
+  animation: dodge 300ms var(--ease) both;
 }
 
 .feedback {
@@ -335,6 +357,63 @@ button:focus-visible {
 
 .is-wrong {
   animation: choiceShake 460ms var(--ease) both;
+}
+
+.is-scolding {
+  animation: scoldPanel 680ms var(--ease) both;
+}
+
+.strict-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 78, 113, 0.26), transparent 15rem),
+    rgba(12, 4, 18, 0.55);
+  pointer-events: none;
+  animation: strictOverlay 1180ms var(--ease) both;
+}
+
+.strict-card {
+  display: grid;
+  width: min(100%, 330px);
+  min-height: 250px;
+  place-items: center;
+  padding: 26px 22px;
+  border: 2px solid rgba(255, 125, 146, 0.92);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(165deg, rgba(255, 112, 132, 0.2), rgba(18, 5, 27, 0.94)),
+    rgba(32, 8, 35, 0.94);
+  box-shadow:
+    0 0 0 8px rgba(255, 92, 118, 0.08),
+    0 28px 70px rgba(0, 0, 0, 0.56);
+  color: #fff7ed;
+  font-size: clamp(1.55rem, 7vw, 2.65rem);
+  font-weight: 950;
+  line-height: 0.98;
+  text-align: center;
+  text-transform: uppercase;
+  animation: strictCardPop 1180ms var(--ease) both;
+}
+
+.strict-card span {
+  display: block;
+}
+
+.strict-mark {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ff5b73;
+  color: #220613;
+  box-shadow: 0 0 42px rgba(255, 91, 115, 0.64);
+  font-size: 2.2rem;
 }
 
 .is-good {
@@ -419,6 +498,7 @@ button:focus-visible {
 
   .answer-zone {
     width: 304px;
+    height: 184px;
   }
 
   .answer-button {
@@ -462,8 +542,11 @@ button:focus-visible {
   0% {
     transform: scale(1);
   }
-  45% {
-    transform: scale(0.94) rotate(-2deg);
+  28% {
+    transform: scale(0.9) rotate(-6deg);
+  }
+  62% {
+    transform: scale(1.08) rotate(5deg);
   }
   100% {
     transform: scale(1) rotate(0);
@@ -497,6 +580,53 @@ button:focus-visible {
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes scoldPanel {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  18% {
+    transform: translateX(-7px);
+  }
+  36% {
+    transform: translateX(7px);
+  }
+  54% {
+    transform: translateX(-4px);
+  }
+  72% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes strictOverlay {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes strictCardPop {
+  0% {
+    transform: scale(0.58) rotate(-4deg);
+  }
+  42% {
+    transform: scale(1.08) rotate(1deg);
+  }
+  72% {
+    transform: scale(1) rotate(0);
+  }
+  100% {
+    transform: scale(0.98);
   }
 }
 

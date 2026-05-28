@@ -44,6 +44,10 @@ const state = {
   isSubmitting: false
 };
 
+let noButtonTimer = 0;
+let noButtonHopTimers = [];
+let strictOverlayTimer = 0;
+
 function panel(content, extraClass = "") {
   return `
     <div class="panel">
@@ -64,7 +68,7 @@ function icon(mark) {
 function renderQuestion() {
   return panel(`
     ${icon("♡")}
-    <h1 class="title">Do you want to go on a date with me tonight?</h1>
+    <h1 class="title question-title">Do you want to go on a date with me tonight?</h1>
     <div class="answer-zone" data-answer-zone>
       <button class="answer-button yes-button" type="button" data-action="yes">Yes</button>
       <button class="answer-button no-button" type="button" data-action="no">No</button>
@@ -140,11 +144,16 @@ function renderThanks() {
 }
 
 function render() {
+  stopNoButtonLoop();
   state.feedback = state.screen === "watch" || state.screen === "food" ? state.feedback : "";
   state.feedbackKind = state.feedback ? state.feedbackKind : "";
   app.innerHTML = screens[state.screen]();
   bindEvents();
   focusFirstHeading();
+
+  if (state.screen === "question") {
+    startNoButtonLoop();
+  }
 }
 
 function bindEvents() {
@@ -152,7 +161,10 @@ function bindEvents() {
     setScreen("activities");
   });
 
-  app.querySelector('[data-action="no"]')?.addEventListener("click", moveNoButton);
+  const noButton = app.querySelector('[data-action="no"]');
+  noButton?.addEventListener("click", moveNoButton);
+  noButton?.addEventListener("pointerenter", () => evadeNoButton(noButton, { hops: 2, delay: 90 }));
+  noButton?.addEventListener("focus", () => evadeNoButton(noButton, { hops: 1 }));
 
   app.querySelectorAll("[data-activity]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -177,6 +189,7 @@ function bindEvents() {
       void button.offsetWidth;
       button.classList.add("is-wrong");
       showFeedback("no wrong choice try again", "wrong");
+      showStrictWrong();
     });
   });
 
@@ -198,16 +211,54 @@ function setScreen(screen) {
   render();
 }
 
+function startNoButtonLoop() {
+  const button = app.querySelector('[data-action="no"]');
+
+  if (!button) return;
+
+  noButtonTimer = window.setInterval(() => {
+    evadeNoButton(button, { hops: 2, delay: 110 });
+  }, 1150);
+
+  noButtonHopTimers.push(window.setTimeout(() => evadeNoButton(button, { hops: 2, delay: 120 }), 650));
+}
+
+function stopNoButtonLoop() {
+  if (noButtonTimer) {
+    window.clearInterval(noButtonTimer);
+    noButtonTimer = 0;
+  }
+
+  noButtonHopTimers.forEach((timer) => window.clearTimeout(timer));
+  noButtonHopTimers = [];
+}
+
 function moveNoButton(event) {
-  const button = event.currentTarget;
+  evadeNoButton(event.currentTarget, { hops: 6, delay: 80 });
+}
+
+function evadeNoButton(button, { hops = 1, delay = 0 } = {}) {
+  if (!button?.isConnected) return;
+
+  for (let index = 0; index < hops; index += 1) {
+    const timer = window.setTimeout(() => placeNoButton(button), delay * index);
+    noButtonHopTimers.push(timer);
+  }
+}
+
+function placeNoButton(button) {
   const zone = app.querySelector("[data-answer-zone]");
   const yes = app.querySelector('[data-action="yes"]');
 
-  if (!button || !zone || !yes) return;
+  if (!button?.isConnected || !zone || !yes) return;
 
   const zoneRect = zone.getBoundingClientRect();
   const yesRect = yes.getBoundingClientRect();
   const buttonRect = button.getBoundingClientRect();
+  const current = {
+    left: buttonRect.left - zoneRect.left,
+    top: buttonRect.top - zoneRect.top
+  };
   const yesBox = {
     left: yesRect.left - zoneRect.left,
     right: yesRect.right - zoneRect.left,
@@ -216,7 +267,8 @@ function moveNoButton(event) {
   };
 
   let next = { x: 0, y: 0 };
-  for (let attempt = 0; attempt < 40; attempt += 1) {
+  let bestDistance = -1;
+  for (let attempt = 0; attempt < 56; attempt += 1) {
     const x = randomBetween(0, Math.max(0, zoneRect.width - buttonRect.width));
     const y = randomBetween(0, Math.max(0, zoneRect.height - buttonRect.height));
     const candidate = {
@@ -227,8 +279,12 @@ function moveNoButton(event) {
     };
 
     if (!boxesOverlap(candidate, yesBox, 12)) {
-      next = { x, y };
-      break;
+      const distance = Math.hypot(x - current.left, y - current.top);
+
+      if (distance > bestDistance) {
+        next = { x, y };
+        bestDistance = distance;
+      }
     }
   }
 
@@ -237,6 +293,36 @@ function moveNoButton(event) {
   button.classList.remove("is-running");
   void button.offsetWidth;
   button.classList.add("is-running");
+}
+
+function showStrictWrong() {
+  window.clearTimeout(strictOverlayTimer);
+  app.querySelector(".strict-overlay")?.remove();
+
+  const panelElement = app.querySelector(".panel");
+  if (!panelElement) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "strict-overlay";
+  overlay.setAttribute("aria-hidden", "true");
+  overlay.innerHTML = `
+    <div class="strict-card">
+      <span class="strict-mark">!</span>
+      <strong>NO.</strong>
+      <span>wrong choice.</span>
+      <span>try again.</span>
+    </div>
+  `;
+
+  panelElement.classList.remove("is-scolding");
+  void panelElement.offsetWidth;
+  panelElement.classList.add("is-scolding");
+  panelElement.appendChild(overlay);
+
+  strictOverlayTimer = window.setTimeout(() => {
+    overlay.remove();
+    panelElement.classList.remove("is-scolding");
+  }, 1180);
 }
 
 function boxesOverlap(a, b, padding = 0) {
